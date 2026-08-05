@@ -1,0 +1,8 @@
+{
+  "model_name": "deterministic-rule-based-agents",
+  "parameter_size_billion": 0,
+  "framework": "Python 3.11 standard library",
+  "runtime": "local",
+  "purpose": "Evidence extraction, EC_POLICY_V1 evaluation, and verification without a generative model call",
+  "compliance_note": "The runtime invokes no parameterized generative model; policy agents are deterministic code, so the model-size limit is not exceeded. GPT-5.6 Terra was used only as a development assistant and is not part of the submitted runtime."
+}

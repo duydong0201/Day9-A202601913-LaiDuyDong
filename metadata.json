@@ -1,0 +1,11 @@
+{
+  "model": {
+    "name": "deterministic-rule-based-agents",
+    "parameter_size_billion": 0,
+    "generative_model_invoked": false
+  },
+  "framework": "Python 3.11 standard library",
+  "runtime": "local",
+  "project": "K3 Day 09 - Multi-Agent E-commerce Dispute Resolution",
+  "trace_file": "trace.jsonl"
+}
