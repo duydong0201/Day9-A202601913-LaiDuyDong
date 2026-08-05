@@ -57,6 +57,11 @@ class OlistRepository:
                 seller_id=row["seller_id"], shipping_limit_at=_date(row["shipping_limit_date"]),
                 price=Decimal(row["price"]), freight_value=Decimal(row["freight_value"]),
             ))
+        # The CSV is not a contract for presentation order.  Output IDs are
+        # canonicalised by their business sequence so repeated runs and
+        # downstream comparisons remain stable.
+        for items in result.values():
+            items.sort(key=lambda item: item.item_id)
         return result
 
     def _load_payments(self) -> dict[str, list[PaymentRecord]]:
@@ -67,4 +72,8 @@ class OlistRepository:
                 payment_type=row["payment_type"], installments=int(row["payment_installments"]),
                 value=Decimal(row["payment_value"]),
             ))
+        # ``payment_sequential`` is the authoritative order, while source-row
+        # order is incidental (and is not always ascending in the dataset).
+        for payments in result.values():
+            payments.sort(key=lambda payment: payment.sequential)
         return result
