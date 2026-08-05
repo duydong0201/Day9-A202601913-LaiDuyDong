@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Agent Test Console</title><link rel="stylesheet" href="/styles.css" /></head>
+<body><main class="shell"><header class="hero"><p class="eyebrow">Olist dispute resolution</p><h1>Agent Test Console</h1><p>Chạy pipeline thật trên CSV, xem handoff và kiểm tra JSON trước khi nộp bài.</p></header>
+<section class="controls" aria-label="Điều khiển kiểm thử"><label for="case-select">Case</label><select id="case-select" aria-label="Chọn case để kiểm thử"></select><button id="run-case" type="button">Chạy case</button><button id="run-all" class="secondary" type="button">Quét 50 case</button></section>
+<p id="status" class="status" role="status">Đang tải danh sách case…</p><section id="summary" class="summary-grid" aria-live="polite"></section>
+<section id="result" class="result hidden" aria-live="polite"><div class="result-head"><div><p class="eyebrow">Kết quả policy</p><h2 id="case-title">—</h2></div><span id="issue-badge" class="badge"></span></div><div id="metrics" class="metrics"></div><div class="panels"><article class="panel"><h3>Agent handoffs</h3><pre id="handoffs"></pre></article><article class="panel"><h3>Output JSON</h3><pre id="output-json"></pre></article><article class="panel wide"><h3>Facts đã đối chiếu</h3><pre id="facts"></pre></article></div></section>
+</main><script src="/app.js"></script></body></html>

@@ -61,12 +61,13 @@ class CoordinatorAgent:
 
     @staticmethod
     def _evidence(facts: OrderFacts, decision) -> list[str]:
-        """Return only the records that establish the selected policy branch.
+        """Return the complete verified order context in canonical order.
 
-        Evidence is deliberately ordered as ``order -> item -> payment ->
-        seller -> policy``.  This keeps the handoff auditable and avoids
-        diluting a case with otherwise valid but irrelevant entity IDs.
-        ``policy:*`` is always retained, even for unusually large orders.
+        The evidence contract permits data-backed order, item, payment, seller,
+        and policy IDs.  Keeping the full context lets a reviewer independently
+        reconcile every entity and financial total used in the final result.
+        IDs are ordered as ``order -> item -> payment -> seller -> policy`` and
+        the policy ID is always retained, even for unusually large orders.
         """
         order_id = facts.order.order_id if facts.order else None
         order_evidence = [f"order:{order_id}"] if order_id else []
@@ -75,44 +76,13 @@ class CoordinatorAgent:
             f"payment:{payment.order_id}:{payment.sequential}"
             for payment in facts.payments
         ]
+        seller_evidence = list(dict.fromkeys(
+            f"seller:{item.seller_id}" for item in facts.items
+        ))
         policy_evidence = [f"policy:{decision.root_cause_code}"]
-
-        if decision.primary_issue in {"canceled_order_paid", "unavailable_order_paid"}:
-            # Status plus paid amount establish the platform refund rule.
-            candidates = order_evidence + payment_evidence
-        elif decision.primary_issue == "late_delivery_seller":
-            # Include only items whose shipping deadline was breached, then
-            # the seller(s) held responsible by the policy.
-            responsible_sellers = {
-                party.party_id
-                for party in decision.responsible_parties
-                if party.party_type == "seller"
-            }
-            late_item_evidence = [
-                f"item:{item.order_id}:{item.item_id}"
-                for item in facts.items
-                if (
-                    item.seller_id in responsible_sellers
-                    and facts.order is not None
-                    and facts.order.delivered_to_carrier_at is not None
-                    and item.shipping_limit_at is not None
-                    and facts.order.delivered_to_carrier_at > item.shipping_limit_at
-                )
-            ]
-            seller_evidence = [f"seller:{seller_id}" for seller_id in sorted(responsible_sellers)]
-            candidates = order_evidence + late_item_evidence + payment_evidence + seller_evidence
-        elif decision.primary_issue in {
-            "late_delivery_logistics",
-            "valid_split_payment",
-            "unsupported_late_claim",
-        }:
-            # Delivery and payment reconciliation rely on the order/item and
-            # payment records; a seller is not a causal party in these rules.
-            candidates = order_evidence + all_item_evidence + payment_evidence
-        else:  # Defensive fallback for future policy versions.
-            candidates = order_evidence + all_item_evidence + payment_evidence
 
         # Deduplicate without disturbing canonical order.  Reserve one slot
         # for the policy evidence rather than accidentally truncating it.
+        candidates = order_evidence + all_item_evidence + payment_evidence + seller_evidence
         supporting = list(dict.fromkeys(candidates))[:9]
         return supporting + policy_evidence
